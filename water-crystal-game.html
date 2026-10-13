@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Порятунок Водного Кристала</title>
+<style>
+:root{
+  --deep:#06122e; --navy:#0b2150; --blue:#14447f; --teal:#19c3c9; --aqua:#7ff0ff; --ice:#d8fbff;
+  --lava:#ff8a1f; --text:#f2fbff; --muted:#a9c8e8; --ok:#5ff0a8; --warn:#ffcf5a; --edge:#04102a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#020814}
+body{font-family:"Trebuchet MS","Segoe UI",Arial,sans-serif;color:var(--text);user-select:none}
+button{font-family:inherit;cursor:pointer;color:#fff}
+img,canvas{image-rendering:pixelated}
+
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:var(--deep)}
+
+/* ---------- TOP BAR ---------- */
+#top{height:96px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px;padding:0 28px;
+  background:linear-gradient(#0d2e66,#081d44);border-bottom:6px solid var(--edge);box-shadow:0 6px 0 #123d80 inset}
+.brand{display:flex;align-items:center;gap:14px;font-size:30px;font-weight:900;letter-spacing:.5px;text-shadow:3px 3px 0 #04102a}
+.brand svg{width:34px;height:46px;filter:drop-shadow(0 0 8px #7ff0ff)}
+#roundPill{font-size:36px;font-weight:900;padding:8px 34px;background:#123d80;border:5px solid var(--aqua);
+  box-shadow:inset -5px -5px 0 rgba(0,0,0,.3),inset 5px 5px 0 rgba(255,255,255,.15),0 0 22px rgba(127,240,255,.35);text-shadow:3px 3px 0 #04102a;white-space:nowrap}
+.nav{display:flex;justify-content:flex-end;gap:12px}
+.pbtn{font-size:24px;font-weight:800;height:62px;padding:0 20px;background:#1a5aa6;border:4px solid #0a2a5a;
+  box-shadow:inset -4px -4px 0 rgba(0,0,0,.3),inset 4px 4px 0 rgba(255,255,255,.22);text-shadow:2px 2px 0 rgba(0,0,0,.4)}
+.pbtn:hover:not(:disabled){filter:brightness(1.2)}
+.pbtn:active:not(:disabled){transform:translateY(2px)}
+.pbtn:disabled{opacity:.35;cursor:default}
+
+/* ---------- MAIN ---------- */
+#main{position:relative;display:flex;height:984px}
+
+/* LEFT: crystal */
+#left{position:relative;width:576px;height:100%;overflow:hidden;border-right:6px solid var(--edge);
+  background:linear-gradient(#0f4a92 0%,#0a3270 45%,#061c42 100%)}
+.ray{position:absolute;top:-60px;width:90px;height:760px;background:linear-gradient(rgba(170,240,255,.22),rgba(170,240,255,0));
+  transform-origin:top center;animation:sway 7s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(-6deg)}}
+.leftTitle{position:absolute;top:22px;left:0;right:0;text-align:center;font-size:26px;font-weight:900;color:var(--ice);letter-spacing:2px;text-shadow:3px 3px 0 #04102a}
+#halo{position:absolute;left:50%;top:270px;width:560px;height:560px;margin:-280px 0 0 -280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(150,245,255,.85) 0%,rgba(80,210,255,.35) 35%,rgba(80,210,255,0) 65%);opacity:0;transition:opacity 1.2s}
+.crystalWrap{position:absolute;left:50%;top:78px;width:280px;height:374px;transform:translateX(-50%);animation:bob 4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-12px)}}
+.crys{width:100%;height:100%;transition:filter 1.2s}
+#left.boost .crys{animation:boost 1.1s ease-out}
+@keyframes boost{0%{transform:scale(1)}35%{transform:scale(1.12)}100%{transform:scale(1)}}
+.ped{position:absolute;left:50%;transform:translateX(-50%);height:64px;background-size:64px 64px;image-rendering:pixelated}
+.seabed{position:absolute;left:0;right:0;height:64px;background-size:64px 64px;image-rendering:pixelated}
+.deep{position:absolute;left:0;right:0;bottom:0;background-size:64px 64px;image-rendering:pixelated}
+.deep::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(3,10,30,.45),rgba(3,10,30,.85))}
+.kelp{position:absolute;width:48px;height:192px;transform-origin:bottom center;animation:kelp 3.4s ease-in-out infinite}
+@keyframes kelp{0%,100%{transform:skewX(4deg)}50%{transform:skewX(-6deg)}}
+.bub{position:absolute;width:14px;height:14px;border:3px solid rgba(220,250,255,.85);pointer-events:none;animation:rise linear forwards}
+.bub::after{content:"";position:absolute;left:1px;top:1px;width:3px;height:3px;background:#fff}
+@keyframes rise{from{transform:translate(0,0)}25%{transform:translate(8px,-25vh)}50%{transform:translate(-6px,-50vh)}to{transform:translate(6px,-110vh);opacity:.2}}
+
+.charge{position:absolute;left:32px;right:32px;top:694px;height:238px;padding:18px 20px;background:rgba(4,12,32,.88);
+  border:5px solid #2b6fb0;box-shadow:inset 0 0 0 4px #081a3c}
+.charge h3{font-size:28px;font-weight:900;text-align:center;letter-spacing:2px;color:var(--ice)}
+.segs{display:flex;gap:12px;justify-content:center;margin-top:16px}
+.seg{position:relative;width:104px;height:84px;background:#0b1a33;border:4px solid #23436e;overflow:hidden}
+.seg .fill{position:absolute;inset:0;background-size:64px 64px;image-rendering:pixelated;transform:scaleY(0);transform-origin:bottom;transition:transform .9s cubic-bezier(.3,1.4,.5,1)}
+.seg .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;color:#3f6a9e;z-index:2}
+.seg.on{border-color:#bff8ff;box-shadow:0 0 22px #7ff0ff}
+.seg.on .fill{transform:scaleY(1)}
+.seg.on .num{color:#fff;text-shadow:2px 2px 0 #0a3a7a}
+.chargeTxt{text-align:center;font-size:26px;font-weight:800;margin-top:14px;color:var(--muted)}
+
+/* RIGHT */
+#right{position:relative;flex:1;padding:20px 26px 0}
+#roundHead{height:56px;display:flex;align-items:center;gap:18px}
+#roundTitle{font-size:38px;font-weight:900;text-shadow:3px 3px 0 #04102a}
+#partBadge{font-size:26px;font-weight:900;padding:4px 16px;background:var(--warn);color:#2a1a00;border:4px solid #8a5a00}
+#sceneFrame{margin-top:14px;width:1292px;height:460px;border:6px solid var(--edge);box-shadow:0 0 0 3px #2b6fb0,0 10px 30px rgba(0,0,0,.5);background:#000}
+#scene{display:block;width:1280px;height:448px}
+#question{margin-top:12px;height:108px;display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:42px;font-weight:900;line-height:1.15;text-shadow:3px 3px 0 #04102a;padding:0 20px}
+#options{display:flex;gap:32px;margin-top:8px}
+.opt{position:relative;flex:1;min-width:280px;height:116px;display:flex;align-items:center;gap:22px;padding:0 26px;text-align:left;
+  font-size:32px;font-weight:800;line-height:1.12;background:#14447f;border:5px solid #5fc8f0;
+  box-shadow:inset -6px -6px 0 rgba(0,0,0,.28),inset 6px 6px 0 rgba(255,255,255,.16);text-shadow:2px 2px 0 rgba(0,0,0,.4);transition:filter .15s,opacity .3s,transform .1s}
+.opt img{width:80px;height:80px;flex:none;border:4px solid #04102a}
+.opt kbd{position:absolute;right:10px;top:8px;font:800 18px/1 "Trebuchet MS",Arial;color:#9cc7ef;opacity:.7}
+.opt:hover:not(:disabled){filter:brightness(1.2);transform:translateY(-2px)}
+.opt:disabled{cursor:default}
+.opt.dim{opacity:.4}
+.opt.right{border-color:var(--ok);box-shadow:0 0 28px rgba(95,240,168,.7),inset -6px -6px 0 rgba(0,0,0,.28)}
+.opt.almost{border-color:var(--warn);box-shadow:0 0 22px rgba(255,207,90,.55),inset -6px -6px 0 rgba(0,0,0,.28)}
+.fb{margin-top:18px;height:120px;display:flex;align-items:center;gap:22px;padding:0 24px;border:5px solid;visibility:hidden;opacity:0;transform:translateY(12px);transition:opacity .35s,transform .35s}
+.fb.show{visibility:visible;opacity:1;transform:none}
+.fb.ok{border-color:var(--ok);background:rgba(8,58,52,.92)}
+.fb.almost{border-color:var(--warn);background:rgba(70,48,8,.92)}
+.fbIcon{width:72px;height:72px;flex:none;display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:900;border:4px solid}
+.fb.ok .fbIcon{border-color:var(--ok);color:var(--ok)}
+.fb.almost .fbIcon{border-color:var(--warn);color:var(--warn)}
+.fbText{flex:1;font-size:30px;font-weight:800;line-height:1.2}
+.fbBtn{font-size:30px;font-weight:900;height:84px;padding:0 30px;border:5px solid;white-space:nowrap;
+  box-shadow:inset -5px -5px 0 rgba(0,0,0,.3),inset 5px 5px 0 rgba(255,255,255,.2)}
+.fb.ok .fbBtn{background:#1c8f63;border-color:#0b4a32}
+.fb.almost .fbBtn{background:#b77a12;border-color:#5a3a00}
+.fbBtn:hover{filter:brightness(1.15)}
+
+/* INTRO */
+#intro{position:absolute;inset:20px 26px 26px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#intro h1{font-size:64px;font-weight:900;color:#fff;text-shadow:0 0 24px rgba(127,240,255,.6),5px 5px 0 #04102a}
+#intro p{font-size:34px;font-weight:700;line-height:1.3;max-width:1150px;margin-top:22px;color:var(--ice)}
+#intro p b{color:var(--aqua)}
+.preview{display:flex;gap:22px;margin-top:38px}
+.pcard{width:270px;padding:16px;background:rgba(4,20,50,.8);border:4px solid #2b6fb0;display:flex;flex-direction:column;align-items:center;gap:10px;font-size:24px;font-weight:800}
+.pcard img{width:80px;height:80px;border:4px solid #04102a}
+.pcard span{color:var(--warn);font-size:20px}
+#startBtn{margin-top:40px;font-size:42px;font-weight:900;height:110px;padding:0 70px;background:#1c8f63;border:6px solid #0b4a32;
+  box-shadow:inset -6px -6px 0 rgba(0,0,0,.3),inset 6px 6px 0 rgba(255,255,255,.2),0 0 30px rgba(95,240,168,.45);animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.05)}}
+.hint{margin-top:26px;font-size:20px;color:var(--muted)}
+
+/* FINAL */
+#final{position:absolute;inset:0;display:none;overflow:hidden;z-index:20;
+  background:radial-gradient(circle at 50% 26%,#2a9fe0 0%,#0d4a8e 38%,#051733 100%)}
+#final.show{display:block}
+.flash{position:absolute;inset:0;background:#e9fdff;opacity:0;animation:flash 1.3s ease-out}
+@keyframes flash{0%{opacity:1}100%{opacity:0}}
+.raysWrap{position:absolute;left:50%;top:22%;width:0;height:0;animation:raysIn 1.4s ease-out both}
+@keyframes raysIn{from{transform:scale(.1);opacity:0}to{transform:scale(1);opacity:1}}
+.rays{position:absolute;left:-1400px;top:-1400px;width:2800px;height:2800px;border-radius:50%;
+  background:repeating-conic-gradient(from 0deg,rgba(180,248,255,.32) 0deg 7deg,rgba(180,248,255,0) 7deg 20deg);
+  -webkit-mask:radial-gradient(circle,#000 0%,#000 18%,transparent 62%);mask:radial-gradient(circle,#000 0%,#000 18%,transparent 62%);
+  animation:spin 28s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fish{position:absolute;width:72px;height:48px;animation-name:swimR;animation-timing-function:linear;animation-iteration-count:infinite}
+.fish.l{animation-name:swimL}
+.fish img{width:100%;height:100%;animation:wig .5s ease-in-out infinite}
+.fish.r img{transform:scaleX(-1)}
+@keyframes swimR{from{left:-140px}to{left:2000px}}
+@keyframes swimL{from{left:2000px}to{left:-140px}}
+@keyframes wig{50%{margin-top:6px}}
+.fbub{position:absolute;bottom:-30px;width:16px;height:16px;border:3px solid rgba(220,250,255,.9);animation:fbub linear infinite}
+@keyframes fbub{from{transform:translateY(0)}to{transform:translateY(-1080px)}}
+.finalInner{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;align-items:center;padding-top:26px}
+.finalCrystal{width:200px;height:268px;animation:fpulse 2s ease-in-out infinite}
+.finalCrystal svg{width:100%;height:100%;filter:brightness(1.25) drop-shadow(0 0 30px #bff8ff) drop-shadow(0 0 60px #4fd6ff)}
+@keyframes fpulse{50%{transform:scale(1.07)}}
+#final h1{margin-top:14px;font-size:72px;font-weight:900;text-shadow:0 0 26px #7ff0ff,5px 5px 0 #04224d}
+#final h2{margin-top:6px;font-size:46px;font-weight:900;color:#bff8ff;text-shadow:4px 4px 0 #04224d}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:1560px;margin-top:30px}
+.sumCard{display:flex;align-items:center;gap:20px;padding:14px 20px;background:rgba(4,20,50,.96);border:4px solid var(--aqua);font-size:29px;font-weight:800;line-height:1.2;text-align:left;animation:pop .5s backwards}
+.sumCard img{width:76px;height:76px;flex:none;border:4px solid #04102a}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+#againBtn{margin-top:32px;font-size:40px;font-weight:900;height:100px;padding:0 60px;background:#1c8f63;border:6px solid #0b4a32;
+  box-shadow:inset -6px -6px 0 rgba(0,0,0,.3),inset 6px 6px 0 rgba(255,255,255,.2)}
+#againBtn:hover{filter:brightness(1.15)}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="stage">
+  <header id="top">
+    <div class="brand"><svg viewBox="0 0 300 400"><use href="#crystalShape"/></svg>Порятунок Водного Кристала</div>
+    <div id="roundPill">Раунд 1 з 4</div>
+    <div class="nav">
+      <button class="pbtn" id="btnBack" title="Назад (←)">◀ Назад</button>
+      <button class="pbtn" id="btnNext" title="Далі (→)">Далі ▶</button>
+      <button class="pbtn" id="btnRestart" title="Почати спочатку (R)">↺ Спочатку</button>
+      <button class="pbtn" id="btnMute" title="Звук (M)">🔊</button>
+    </div>
+  </header>
+
+  <div id="main">
+    <aside id="left">
+      <div class="ray" style="left:60px;animation-delay:-1s"></div>
+      <div class="ray" style="left:230px;width:120px;animation-delay:-3s"></div>
+      <div class="ray" style="left:420px;animation-delay:-5s"></div>
+      <div class="leftTitle">ВОДНИЙ КРИСТАЛ</div>
+      <div id="halo"></div>
+      <div class="crystalWrap">
+        <svg class="crys" id="crys" viewBox="0 0 300 400">
+          <defs>
+            <g id="crystalShape" stroke="#0b3560" stroke-width="4" stroke-linejoin="miter">
+              <polygon points="66,215 48,256 54,342 80,350 92,258" fill="#49c6ea"/>
+              <polygon points="66,215 92,258 80,350" fill="#2a9fd6"/>
+              <polygon points="236,232 218,268 222,348 246,348 254,268" fill="#2a9fd6"/>
+              <polygon points="236,232 218,268 222,348" fill="#8be9fb"/>
+              <polygon points="150,15 92,115 130,128" fill="#e9fdff"/>
+              <polygon points="150,15 130,128 172,128" fill="#bff6ff"/>
+              <polygon points="150,15 172,128 208,115" fill="#7fe3f7"/>
+              <polygon points="92,115 130,128 130,348 98,330" fill="#49c6ea"/>
+              <polygon points="130,128 172,128 172,348 130,348" fill="#8be9fb"/>
+              <polygon points="172,128 208,115 202,330 172,348" fill="#2a9fd6"/>
+              <polygon points="98,330 130,348 150,385" fill="#1f86c4"/>
+              <polygon points="130,348 172,348 150,385" fill="#2fa6dc"/>
+              <polygon points="172,348 202,330 150,385" fill="#13649f"/>
+              <polygon points="140,150 152,140 152,300 140,312" fill="#ffffff" opacity=".6" stroke="none"/>
+              <rect x="104" y="140" width="10" height="10" fill="#ffffff" opacity=".8" stroke="none"/>
+              <rect x="182" y="290" width="8" height="8" fill="#ffffff" opacity=".6" stroke="none"/>
+            </g>
+          </defs>
+          <use href="#crystalShape"/>
+        </svg>
+      </div>
+      <div class="ped" id="ped1" style="top:470px;width:128px"></div>
+      <div class="ped" id="ped2" style="top:534px;width:192px"></div>
+      <div class="seabed" id="seabed" style="top:598px"></div>
+      <div class="deep" id="deep" style="top:662px"></div>
+      <img class="kelp" id="kelp1" alt="" style="left:28px;top:406px">
+      <img class="kelp" id="kelp2" alt="" style="left:476px;top:438px;height:160px;animation-delay:-1.5s">
+      <div class="charge">
+        <h3>СИЛА КРИСТАЛА</h3>
+        <div class="segs" id="segs"></div>
+        <div class="chargeTxt" id="chargeTxt">Заряд: 0 з 4</div>
+      </div>
+      <div id="bubLayer"></div>
+    </aside>
+
+    <section id="right">
+      <div id="intro">
+        <h1>Порятунок Водного Кристала</h1>
+        <p>Дослідники знайшли <b>Водний Кристал</b> — джерело життя для водних істот.</p>
+        <p>Але кристал втратив силу, і водойми почали зникати!<br>Покажімо, що ми знаємо, як поводиться вода, — і кристал знову засяє.</p>
+        <div class="preview" id="preview"></div>
+        <button id="startBtn">Почати ▶</button>
+        <div class="hint">Для викладача: → далі · ← назад · R — спочатку · 1 / 2 — відповідь · M — звук</div>
+      </div>
+      <div id="roundView" class="hidden">
+        <div id="roundHead"><div id="roundTitle"></div><div id="partBadge"></div></div>
+        <div id="sceneFrame"><canvas id="scene" width="1280" height="448"></canvas></div>
+        <div id="question"></div>
+        <div id="options"></div>
+        <div class="fb" id="fb">
+          <div class="fbIcon" id="fbIcon"></div>
+          <div class="fbText" id="fbText"></div>
+          <button class="fbBtn" id="fbBtn"></button>
+        </div>
+      </div>
+    </section>
+
+    <div id="final">
+      <div class="raysWrap"><div class="rays"></div></div>
+      <div id="finalDeco"></div>
+      <div class="flash"></div>
+      <div class="finalInner">
+        <div class="finalCrystal"><svg viewBox="0 0 300 400"><use href="#crystalShape"/></svg></div>
+        <h1>Кристал знову сяє!</h1>
+        <h2>Ви — справжні Майстри Водної Стихії!</h2>
+        <div class="sum" id="sum"></div>
+        <button id="againBtn">↺ Грати знову</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const B = 64, CW = 1280, CH = 448;
+
+/* ============ helpers ============ */
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+const easeIn = k => k * k;
+const easeInOut = k => k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+const easeOutBack = k => { const c = 1.9; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+const easeOutBounce = k => {
+  const n = 7.5625, d = 2.75;
+  if (k < 1 / d) return n * k * k;
+  if (k < 2 / d) return n * (k -= 1.5 / d) * k + .75;
+  if (k < 2.5 / d) return n * (k -= 2.25 / d) * k + .9375;
+  return n * (k -= 2.625 / d) * k + .984375;
+};
+function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hex(h) { h = h.replace('#', ''); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+function pick(p, v) { return hex(p[Math.max(0, Math.min(p.length - 1, Math.floor(v * p.length)))]); }
+function vnoise(R, cells) {
+  const g = []; for (let i = 0; i < cells * cells; i++) g.push(R());
+  const at = (a, b) => g[((b % cells + cells) % cells) * cells + ((a % cells + cells) % cells)];
+  const s = t => t * t * (3 - 2 * t);
+  return (x, y) => {
+    const fx = x / 16 * cells, fy = y / 16 * cells, x0 = Math.floor(fx), y0 = Math.floor(fy);
+    const u = s(fx - x0), w = s(fy - y0);
+    const a = at(x0, y0), b = at(x0 + 1, y0), c = at(x0, y0 + 1), d = at(x0 + 1, y0 + 1);
+    return a + (b - a) * u + (c - a) * w + (a - b - c + d) * u * w;
+  };
+}
+function voro(R, n) {
+  const pts = []; for (let i = 0; i < n; i++) pts.push([R() * 16, R() * 16, R()]);
+  return (x, y) => {
+    let d1 = 1e9, d2 = 1e9, id = 0;
+    for (let i = 0; i < n; i++) {
+      let dx = Math.abs(x + .5 - pts[i][0]); dx = Math.min(dx, 16 - dx);
+      let dy = Math.abs(y + .5 - pts[i][1]); dy = Math.min(dy, 16 - dy);
+      const d = Math.hypot(dx, dy);
+      if (d < d1) { d2 = d1; d1 = d; id = i; } else if (d < d2) d2 = d;
+    }
+    return { d1, d2, v: pts[id][2] };
+  };
+}
+
+/* ============ original pixel textures (16×16, procedural) ============ */
+const PAL = {
+  green: ['#3f8f2a', '#4fa632', '#5fbf3a', '#73d24a'],
+  dirt: ['#6b4224', '#7a4d2a', '#8a5a33', '#9b6a3f'],
+  stone: ['#6e737b', '#7d828b', '#8a8f98', '#979ca5'],
+  cobble: ['#767b84', '#878c94', '#9a9fa7', '#a9aeb6'],
+  obsid: ['#140c1f', '#1a1026', '#22142f', '#2c1a3d'],
+  lava: ['#d9480f', '#f2661a', '#ff8a1f', '#ffa733', '#ffc94a', '#ffe680'],
+  water: ['#1a4fb8', '#1f5fd1', '#2a72e0', '#3b86ee', '#58a2f6'],
+  soul: ['#3e2c20', '#4d3829', '#5a4232', '#664b39'],
+  magma: ['#4a120a', '#5a170c', '#6b1e10', '#7c2412'],
+  sand: ['#c9b679', '#d6c486', '#e3d39a', '#ecdfab'],
+};
+const TEXDEF = {
+  grass: R => { const n = vnoise(R, 4), e = []; for (let i = 0; i < 16; i++) e.push(3 + (R() < .45 ? 1 : 0) + (R() < .15 ? 1 : 0));
+    return (x, y) => { const v = n(x, y) * .6 + R() * .4; return y < e[x] ? pick(PAL.green, v) : y === e[x] ? pick(PAL.dirt, v * .3) : pick(PAL.dirt, v); }; },
+  dirt: R => { const n = vnoise(R, 4); return (x, y) => pick(PAL.dirt, n(x, y) * .5 + R() * .5); },
+  stone: R => { const n = vnoise(R, 4); return (x, y) => R() < .05 ? hex('#5d6168') : pick(PAL.stone, n(x, y) * .6 + R() * .4); },
+  cobble: R => { const vo = voro(R, 9); return (x, y) => { const v = vo(x, y); return v.d2 - v.d1 < 1.1 ? hex('#4b4f55') : pick(PAL.cobble, v.v * .7 + R() * .3); }; },
+  obsid: R => { const n = vnoise(R, 4); return (x, y) => { const r = R(); return r < .03 ? hex('#7d4fb8') : r < .09 ? hex('#4b2a6b') : pick(PAL.obsid, n(x, y) * .6 + R() * .4); }; },
+  lava: R => { const a = vnoise(R, 4), b = vnoise(R, 8); return (x, y) => R() < .03 ? hex('#fff2a8') : pick(PAL.lava, a(x, y) * .6 + b(x, y) * .4); },
+  water: R => { const a = vnoise(R, 4), b = vnoise(R, 8); return (x, y) => pick(PAL.water, a(x, y) * .5 + b(x, y) * .3 + R() * .2); },
+  soul: R => { const n = vnoise(R, 4), holes = []; for (let i = 0; i < 4; i++) holes.push([2 + R() * 12, 3 + R() * 11]);
+    return (x, y) => { for (const [hx, hy] of holes) { const d = Math.hypot(x - hx, (y - hy) * 1.3); if (d < 1.5) return hex('#2a1d15'); if (d < 2.2 && y < hy) return hex('#7a5a44'); } return pick(PAL.soul, n(x, y) * .6 + R() * .4); }; },
+  magma: R => { const vo = voro(R, 6), n = vnoise(R, 4); return (x, y) => { const v = vo(x, y), d = v.d2 - v.d1; return d < .8 ? hex('#ffd04a') : d < 1.6 ? hex('#ff7a1a') : pick(PAL.magma, n(x, y) * .6 + R() * .4); }; },
+  sand: R => { const n = vnoise(R, 4); return (x, y) => pick(PAL.sand, n(x, y) * .5 + R() * .5); },
+  glass: () => (x, y) => {
+    if (x === 0 || y === 0 || x === 15 || y === 15) return [215, 245, 255, 235];
+    if ((x === 3 && y === 2) || (x === 2 && y === 3) || (x === 4 && y === 2) || (x === 2 && y === 4) || (x === 12 && y === 11) || (x === 11 && y === 12)) return [255, 255, 255, 200];
+    return [180, 230, 255, 26];
+  },
+  bricks: R => { const n = vnoise(R, 4); return (x, y) => { const m = y % 8 === 7 || (y < 8 ? (x === 7 || x === 15) : (x === 3 || x === 11)); if (m) return hex('#55595f'); if (y % 8 === 0) return hex('#a3a8b0'); return pick(PAL.stone, n(x, y) * .5 + R() * .5); }; },
+  polished: R => (x, y) => x === 0 || y === 0 ? hex('#c0c5ce') : x === 15 || y === 15 ? hex('#5d6168') : pick(['#9a9fa8', '#a3a8b0', '#aab0b8'], R()),
+};
+const T16 = {}, T = {};
+(function buildTextures() {
+  let seed = 11;
+  for (const name in TEXDEF) {
+    const c = document.createElement('canvas'); c.width = c.height = 16;
+    const x = c.getContext('2d'), img = x.createImageData(16, 16), f = TEXDEF[name](rng(seed++ * 97));
+    for (let y = 0; y < 16; y++) for (let i = 0; i < 16; i++) {
+      const col = f(i, y), k = (y * 16 + i) * 4;
+      img.data[k] = col[0]; img.data[k + 1] = col[1]; img.data[k + 2] = col[2]; img.data[k + 3] = col[3] === undefined ? 255 : col[3];
+    }
+    x.putImageData(img, 0, 0); T16[name] = c;
+    const u = document.createElement('canvas'); u.width = u.height = 64;
+    const ux = u.getContext('2d'); ux.imageSmoothingEnabled = false; ux.drawImage(c, 0, 0, 64, 64); T[name] = u;
+  }
+})();
+const texURL = n => T16[n].toDataURL();
+
+/* ============ sprites ============ */
+const EXPLORER = [
+  "..GGGGGG..",
+  ".GgssssgG.",
+  "GgsessesgG",
+  "GgssssssgG",
+  ".GggggggG.",
+  "..GGGGGG..",
+  ".oooooooo.",
+  "soooooooos",
+  "sOooooooOs",
+  ".yyyyyyyy.",
+  ".oooOOooo.",
+  ".ooo..ooo.",
+  ".ooo..ooo.",
+  ".bbb..bbb."];
+const EXC = { G: '#4fd6ec', g: 'rgba(200,245,255,.55)', s: '#f2c48d', e: '#1b1b2f', o: '#ff8c2a', O: '#c45d12', y: '#ffd84a', b: '#3a2b52' };
+const FISH = [
+  "....oo......",
+  "...oooo...o.",
+  "..oossoo.oo.",
+  ".eoossooooo.",
+  ".oooossoooo.",
+  "..oossoo.oo.",
+  "...oooo...o.",
+  "....oo......"];
+function spriteCanvas(map, colors, sc) {
+  const c = document.createElement('canvas'); c.width = map[0].length * sc; c.height = map.length * sc;
+  const x = c.getContext('2d');
+  map.forEach((row, j) => [...row].forEach((ch, i) => { if (colors[ch]) { x.fillStyle = colors[ch]; x.fillRect(i * sc, j * sc, sc, sc); } }));
+  return c;
+}
+const explorerImg = spriteCanvas(EXPLORER, EXC, 4);
+const ARROW_UP = ["...#...", "..###..", ".#####.", "#######", "..###..", "..###..", "..###..", "..###.."];
+
+/* ============ icons ============ */
+function icon(fn) { const c = document.createElement('canvas'); c.width = c.height = 96; const x = c.getContext('2d'); x.imageSmoothingEnabled = false; fn(x); return c.toDataURL(); }
+const tl = (x, n, dx, dy, dw, dh, sy = 0, sh = 16) => x.drawImage(T16[n], 0, sy, 16, sh, dx, dy, dw, dh);
+function iconArrow(x, dir, col) {
+  const m = dir === 'up' ? ARROW_UP : [...ARROW_UP].reverse(); x.fillStyle = col;
+  m.forEach((r, j) => [...r].forEach((ch, i) => { if (ch === '#') x.fillRect(20 + i * 8, 16 + j * 8, 8, 8); }));
+}
+const ICONS = {
+  waterHigh: icon(x => { x.fillStyle = '#123a7a'; x.fillRect(0, 0, 96, 96); tl(x, 'grass', 0, 72, 96, 24, 0, 4); tl(x, 'water', 0, 6, 96, 66, 0, 11); x.fillStyle = 'rgba(210,248,255,.85)'; x.fillRect(0, 6, 96, 6); }),
+  waterLow: icon(x => { x.fillStyle = '#123a7a'; x.fillRect(0, 0, 96, 96); tl(x, 'grass', 0, 72, 96, 24, 0, 4); tl(x, 'water', 0, 60, 96, 12, 0, 2); x.fillStyle = 'rgba(210,248,255,.85)'; x.fillRect(0, 60, 96, 4); }),
+  flowStay: icon(x => { x.fillStyle = '#123a7a'; x.fillRect(0, 0, 96, 96); tl(x, 'grass', 0, 72, 96, 24, 0, 4); tl(x, 'water', 0, 38, 96, 34, 0, 6); x.fillStyle = 'rgba(210,248,255,.85)'; x.fillRect(0, 38, 96, 5); }),
+  flowGone: icon(x => { x.fillStyle = '#123a7a'; x.fillRect(0, 0, 96, 96); tl(x, 'grass', 0, 72, 96, 24, 0, 4); x.strokeStyle = 'rgba(127,240,255,.8)'; x.lineWidth = 4; x.setLineDash([8, 8]); x.strokeRect(6, 40, 84, 30); }),
+  cobble: icon(x => tl(x, 'cobble', 0, 0, 96, 96)),
+  obsid: icon(x => tl(x, 'obsid', 0, 0, 96, 96)),
+  up: icon(x => { tl(x, 'water', 0, 0, 96, 96); iconArrow(x, 'up', '#ffffff'); }),
+  down: icon(x => { tl(x, 'water', 0, 0, 96, 96); iconArrow(x, 'down', '#ffffff'); }),
+  blocked: icon(x => { x.fillStyle = '#123a7a'; x.fillRect(0, 0, 96, 96); tl(x, 'grass', 0, 72, 96, 24, 0, 4); tl(x, 'water', 0, 24, 32, 48, 0, 8); tl(x, 'stone', 32, 24, 32, 48, 0, 8); x.strokeStyle = 'rgba(127,240,255,.8)'; x.lineWidth = 3; x.setLineDash([6, 6]); x.strokeRect(66, 48, 28, 22); }),
+  lavaMix: icon(x => { tl(x, 'cobble', 0, 0, 48, 96); x.drawImage(T16.obsid, 0, 0, 8, 16, 48, 0, 48, 96); x.fillStyle = '#04102a'; x.fillRect(46, 0, 4, 96); }),
+  lift: icon(x => { tl(x, 'water', 0, 0, 96, 72, 0, 12); tl(x, 'soul', 0, 72, 48, 24, 0, 4); x.drawImage(T16.magma, 0, 0, 16, 4, 48, 72, 48, 24); x.fillStyle = '#fff';
+    [[12, 50], [24, 30], [14, 12]].forEach(([a, b]) => x.fillRect(a, b, 8, 8)); x.fillStyle = '#ffd04a'; [[66, 14], [76, 34], [68, 54]].forEach(([a, b]) => x.fillRect(a, b, 8, 8)); }),
+};
+
+/* ============ sound (Web Audio) ============ */
+const AU = { ctx: null, master: null, noise: null, muted: false };
+function A() {
+  if (!AU.ctx) {
+    const C = window.AudioContext || window.webkitAudioContext; AU.ctx = new C();
+    AU.master = AU.ctx.createGain(); AU.master.gain.value = .6; AU.master.connect(AU.ctx.destination);
+    const len = AU.ctx.sampleRate * 2, b = AU.ctx.createBuffer(1, len, AU.ctx.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1; AU.noise = b;
+  }
+  if (AU.ctx.state === 'suspended') AU.ctx.resume();
+  return AU.ctx;
+}
+function tone(freq, dur, { type = 'sine', vol = .3, delay = 0, to = null, attack = .01 } = {}) {
+  if (AU.muted) return; const c = A(), t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t); if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + attack); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  o.connect(g).connect(AU.master); o.start(t); o.stop(t + dur + .05);
+}
+function noise(dur, { type = 'bandpass', f = 1000, f2 = null, q = 1, vol = .3, delay = 0, attack = .01 } = {}) {
+  if (AU.muted) return; const c = A(), t = c.currentTime + delay, s = c.createBufferSource(), fl = c.createBiquadFilter(), g = c.createGain();
+  s.buffer = AU.noise; s.loop = true; fl.type = type; fl.frequency.setValueAtTime(f, t); if (f2) fl.frequency.exponentialRampToValueAtTime(f2, t + dur); fl.Q.value = q;
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + attack); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  s.connect(fl).connect(g).connect(AU.master); s.start(t); s.stop(t + dur + .05);
+}
+const SFX = {
+  splash() { noise(.45, { f: 1400, f2: 300, q: .8, vol: .35 }); tone(500, .25, { to: 140, vol: .15 }); },
+  hiss() { noise(1.4, { type: 'highpass', f: 2600, vol: .22, attack: .03 }); noise(.4, { f: 600, f2: 200, vol: .2 }); },
+  bubbles(n = 6, dur = 1) { for (let i = 0; i < n; i++) tone(250 + Math.random() * 250, .09, { to: 900 + Math.random() * 500, vol: .12, delay: i * (dur / n) + Math.random() * .05 }); },
+  chime() { [1318.5, 1760, 2637].forEach((f, i) => tone(f, 1.6, { vol: .16, delay: i * .09 })); tone(659, 1.2, { type: 'triangle', vol: .08 }); },
+  ding() { tone(1318.5, .8, { vol: .14 }); tone(1975, .6, { vol: .08, delay: .06 }); },
+  soft() { tone(523, .25, { type: 'triangle', vol: .14 }); tone(440, .4, { type: 'triangle', vol: .14, delay: .18 }); },
+  thud() { tone(140, .25, { to: 50, vol: .4 }); noise(.15, { type: 'lowpass', f: 400, vol: .25 }); },
+  drip(i) { const f = 900 - i * 90; tone(f, .12, { to: f * .6, vol: .12 }); },
+  pop() { tone(300, .12, { to: 700, vol: .2, type: 'triangle' }); },
+  whoosh() { noise(1.1, { type: 'lowpass', f: 1400, f2: 200, q: 2, vol: .3, attack: .1 }); for (let i = 0; i < 6; i++) tone(800 - i * 80, .1, { to: 300, vol: .1, delay: .15 * i }); },
+  click() { tone(800, .05, { type: 'square', vol: .04 }); },
+  fanfare() { [784, 988, 1175, 1568].forEach((f, i) => tone(f, .5, { type: 'triangle', vol: .14, delay: i * .12 })); [1318.5, 1760, 2637, 3136].forEach((f, i) => tone(f, 2, { vol: .12, delay: .55 + i * .1 })); SFX.bubbles(10, 1.6); },
+};
+
+/* ============ steps ============ */
+const STEPS = [
+  { id: 'intro' },
+  { id: 'r1', round: 1, title: 'Де джерело?', q: 'Де тут джерело води?',
+    opts: [['На початку, де вода найвища', 'waterHigh'], ['В кінці, де вода найнижча', 'waterLow']], correct: 0, fills: true, dur: 1700,
+    explain: 'Джерело — це повний блок води. З нього витікає потік.' },
+  { id: 'r2', round: 2, title: 'Залишиться чи зникне?', q: 'Ми поставили блок між джерелом і потоком. Що буде з потоком?',
+    opts: [['Потік залишиться', 'flowStay'], ['Потік зникне', 'flowGone']], correct: 1, fills: true, dur: 1900,
+    explain: 'Потік живе, лише поки його живить джерело.' },
+  { id: 'r3a', round: 3, part: 'А', title: 'Що вийде?', q: 'Вода стікає на ПОТІК лави. Що утвориться?',
+    opts: [['Кругляк', 'cobble'], ['Обсидіан', 'obsid']], correct: 0, fills: false, dur: 1700,
+    explain: 'Так! Потік лави + вода = кругляк.' },
+  { id: 'r3b', round: 3, part: 'Б', title: 'Що вийде?', q: 'Вода стікає на ДЖЕРЕЛО лави. А тепер?',
+    opts: [['Кругляк', 'cobble'], ['Обсидіан', 'obsid']], correct: 1, fills: true, dur: 1700,
+    explain: 'Потік лави + вода = кругляк. Джерело лави + вода = обсидіан.' },
+  { id: 'r4a', round: 4, part: 'А', title: 'Вгору чи вниз?', q: 'Ліва колона: на дні пісок душ. Куди понесе дослідника?',
+    opts: [['Вгору ⬆️', 'up'], ['Вниз ⬇️', 'down']], correct: 0, fills: false, dur: 1800,
+    explain: 'Так! Пісок душ піднімає дослідника вгору.' },
+  { id: 'r4b', round: 4, part: 'Б', title: 'Вгору чи вниз?', q: 'Права колона: на дні блок магми. А тут?',
+    opts: [['Вгору ⬆️', 'up'], ['Вниз ⬇️', 'down']], correct: 1, fills: true, dur: 1700,
+    explain: 'Пісок душ піднімає, блок магми тягне вниз. Так працює водяний ліфт!' },
+  { id: 'final' },
+];
+
+/* ============ state ============ */
+let idx = 0, answered = false, lastCorrect = false, timers = [];
+const charged = new Set();
+const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
+
+/* ============ canvas scenes ============ */
+const cv = $('#scene'), ctx = cv.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+const P = { water: ctx.createPattern(T.water, 'repeat'), lava: ctx.createPattern(T.lava, 'repeat') };
+let S = null;
+function newScene(id) { const n = performance.now(); S = { id, enter: n, playAt: null, last: n, parts: [], acc: 0, bL: [], bR: [], accL: 0, accR: 0 }; }
+
+function blk(n, x, y) { ctx.drawImage(T[n], x, y); }
+function fluid(kind, x, y, w, h, t, alpha) {
+  if (h <= 0 || w <= 0) return;
+  const p = P[kind], off = kind === 'water' ? t * .03 : t * .012;
+  p.setTransform(new DOMMatrix([1, 0, 0, 1, off % 64, (off * .5) % 64]));
+  ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = p; ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = kind === 'water' ? 'rgba(200,245,255,.75)' : 'rgba(255,235,130,.85)';
+  ctx.fillRect(x, y, w, Math.min(4, h)); ctx.restore();
+}
+function waterAt(c, r, lv, t, ox = 0) { if (lv <= .02) return; const h = Math.round(lv / 8 * B); fluid('water', ox + c * B, r * B + B - h, B, h, t, .88); }
+function lavaAt(c, r, lv, t, ox = 0) { const h = Math.round(lv / 8 * B); fluid('lava', ox + c * B, r * B + B - h, B, h, t, 1); }
+function tag(text, cx, by, o = {}) {
+  ctx.save(); ctx.font = 'bold 24px "Trebuchet MS",Arial,sans-serif';
+  const w = Math.ceil(ctx.measureText(text).width) + 28, h = 40, x = Math.round(cx - w / 2), y = by - h, col = o.c || '#7ff0ff';
+  ctx.fillStyle = 'rgba(6,18,46,.92)'; ctx.fillRect(x, y, w, h);
+  ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
+  ctx.fillStyle = col; ctx.beginPath();
+  if (o.ptr === 'down') { ctx.moveTo(cx - 10, by); ctx.lineTo(cx + 10, by); ctx.lineTo(cx, by + 12); }
+  if (o.ptr === 'downLeft') { ctx.moveTo(x + 12, by); ctx.lineTo(x + 32, by); ctx.lineTo(x + 22, by + 12); }
+  if (o.ptr === 'right') { ctx.moveTo(x + w, y + 10); ctx.lineTo(x + w, y + 30); ctx.lineTo(x + w + 12, y + 20); }
+  if (o.ptr === 'left') { ctx.moveTo(x, y + 10); ctx.lineTo(x, y + 30); ctx.lineTo(x - 12, y + 20); }
+  ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, x + w / 2, y + h / 2 + 1);
+  ctx.restore();
+}
+function glowFrame(x, y, col, t) {
+  const p = .5 + .5 * Math.sin(t / 150);
+  ctx.save(); ctx.shadowColor = col; ctx.shadowBlur = 18 + 14 * p; ctx.strokeStyle = col; ctx.globalAlpha = .7 + .3 * p;
+  ctx.lineWidth = 6; ctx.strokeRect(x + 3, y + 3, B - 6, B - 6); ctx.restore();
+}
+function dim(x, y, w, h, q) {
+  ctx.fillStyle = 'rgba(3,8,24,.66)'; ctx.fillRect(x, y, w, h);
+  if (q) { ctx.save(); ctx.font = '900 150px "Trebuchet MS",Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const qy = y + h * .4; ctx.fillStyle = '#04102a'; ctx.fillText('?', x + w / 2 + 6, qy + 6); ctx.fillStyle = '#ffcf5a'; ctx.fillText('?', x + w / 2, qy); ctx.restore(); }
+}
+function badge(L, x, y) {
+  ctx.fillStyle = '#ffcf5a'; ctx.fillRect(x, y, 52, 52); ctx.strokeStyle = '#8a5a00'; ctx.lineWidth = 4; ctx.strokeRect(x + 2, y + 2, 48, 48);
+  ctx.fillStyle = '#2a1a00'; ctx.font = '900 34px "Trebuchet MS",Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(L, x + 26, y + 28);
+}
+function pixArrow(cx, cy, dir, col, sc = 9) {
+  const m = dir === 'up' ? ARROW_UP : [...ARROW_UP].reverse(), w = 7 * sc, h = 8 * sc;
+  ctx.save(); ctx.shadowColor = col; ctx.shadowBlur = 16;
+  m.forEach((r, j) => [...r].forEach((ch, i) => { if (ch === '#') { ctx.fillStyle = '#04102a'; ctx.fillRect(cx - w / 2 + i * sc + 4, cy - h / 2 + j * sc + 4, sc, sc); } }));
+  m.forEach((r, j) => [...r].forEach((ch, i) => { if (ch === '#') { ctx.fillStyle = col; ctx.fillRect(cx - w / 2 + i * sc, cy - h / 2 + j * sc, sc, sc); } }));
+  ctx.restore();
+}
+function bubble(x, y, r) {
+  ctx.strokeStyle = 'rgba(225,250,255,.9)'; ctx.lineWidth = 3; ctx.strokeRect(Math.round(x - r), Math.round(y - r), r * 2, r * 2);
+  ctx.fillStyle = '#fff'; ctx.fillRect(Math.round(x - r + 2), Math.round(y - r + 2), 3, 3);
+}
+function kelp(x, base, n, t) {
+  for (let i = 0; i < n; i++) {
+    const off = Math.round(Math.sin(t / 700 + i * .7) * (i * 1.6));
+    ctx.fillStyle = i % 2 ? '#2f9a4a' : '#3fb35a'; ctx.fillRect(x + off, base - (i + 1) * 16, 16, 16);
+    if (i % 3 === 1) { ctx.fillStyle = '#5fd06e'; ctx.fillRect(x + off + 16, base - (i + 1) * 16 + 4, 10, 8); }
+  }
+}
+
+/* --- valley (rounds 1–2) --- */
+const VSURF = c => c < 3 ? 2 : c < 7 ? 3 : 4;
+const FLOW = [[4, 7], [5, 6], [6, 5], [7, 4], [8, 3], [9, 2], [10, 1]];
+function valleyBg(t) {
+  const g = ctx.createLinearGradient(0, 0, 0, CH); g.addColorStop(0, '#123a7a'); g.addColorStop(1, '#4a9be0');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, CW, CH);
+  ctx.fillStyle = 'rgba(230,248,255,.45)';
+  [[100, 40, 0], [600, 70, 1], [1000, 30, 2]].forEach(([bx, y, i]) => {
+    const x = ((bx + t * .012 * (i + 1)) % (CW + 260)) - 130;
+    ctx.fillRect(x, y, 128, 24); ctx.fillRect(x + 24, y - 16, 72, 16); ctx.fillRect(x + 40, y + 24, 104, 16);
+  });
+}
+function valleyGround() { for (let c = 0; c < 20; c++) { const s = VSURF(c); for (let r = s; r < 7; r++) blk(r === s ? 'grass' : r === 6 ? 'stone' : 'dirt', c * B, r * B); } }
+function valleyWater(t, lv) {
+  waterAt(3, 2, 8, t);
+  FLOW.forEach(([c]) => waterAt(c, VSURF(c) - 1, lv[c], t));
+  const a = clamp(lv[6] / 5);
+  if (a > .02) { const top = 3 * B - Math.round(lv[6] / 8 * B), bot = 4 * B - Math.round(lv[7] / 8 * B); fluid('water', 7 * B, top, 18, bot - top, t, .88 * a); }
+}
+function sceneR1(t, te, tp) {
+  valleyBg(t); valleyGround();
+  const lv = {}; FLOW.forEach(([c, L]) => lv[c] = L); valleyWater(t, lv);
+  if (tp < 0) { tag('?', 3.5 * B, 2 * B - 14, { c: '#ffcf5a', ptr: 'down' }); tag('?', 10.5 * B, 4 * B - 22, { c: '#ffcf5a', ptr: 'down' }); return; }
+  glowFrame(3 * B, 2 * B, '#fff27a', t);
+  const cyc = ((tp - 250) % 1500) / 1200;
+  if (tp > 250 && cyc <= 1) {
+    const pos = 4 + cyc * 7;
+    FLOW.forEach(([c, L]) => { const a = Math.max(0, 1 - Math.abs(c + .5 - pos)) * .6; if (a > 0) { const h = Math.round(L / 8 * B); ctx.fillStyle = `rgba(255,255,255,${a})`; ctx.fillRect(c * B, (VSURF(c) - 1) * B + B - h, B, h); } });
+  }
+  if (tp > 300) { tag('ДЖЕРЕЛО', 3.5 * B, 2 * B - 16, { c: '#fff27a', ptr: 'down' }); tag('ПОТІК ➜', 8.5 * B, 4 * B - 38, { ptr: 'down' }); }
+}
+function sceneR2(t, te, tp) {
+  valleyBg(t); valleyGround();
+  const k = clamp(te / 450), lv = {};
+  FLOW.forEach(([c, L]) => { lv[c] = c === 4 ? (k < 1 ? L : 0) : (tp < 0 ? L : L * (1 - clamp((tp - (150 + (c - 5) * 260)) / 350))); });
+  valleyWater(t, lv);
+  blk('stone', 4 * B, Math.round(lerp(-B, 2 * B, easeOutBounce(k))));
+  if (te > 450 && te < 1100) { ctx.strokeStyle = `rgba(255,255,255,${1 - (te - 450) / 650})`; ctx.lineWidth = 5; ctx.strokeRect(4 * B + 2, 2 * B + 2, B - 4, B - 4); }
+  if (tp < 0) { if (te > 500) tag('БЛОК', 4.5 * B, 2 * B - 16, { c: '#d0d6e0', ptr: 'down' }); return; }
+  glowFrame(3 * B, 2 * B, '#7ff0ff', t);
+  if (tp > 1700) { tag('ДЖЕРЕЛО ЗАЛИШИЛОСЯ', 3.2 * B, 2 * B - 16, { ptr: 'down' }); tag('ПОТОКУ НЕМАЄ', 8.5 * B, 4 * B - 14, { c: '#ffcf5a' }); }
+}
+
+/* --- lava (round 3) --- */
+const LFLOW = [[4, 2], [5, 3], [6, 4], [7, 5], [8, 6], [9, 7]];
+function lavaHalf(ox, kind, t, tp, done) {
+  ctx.save(); ctx.beginPath(); ctx.rect(ox, 0, 640, CH); ctx.clip();
+  for (let r = 0; r < 7; r++) for (let c = 0; c < 10; c++) blk('stone', ox + c * B, r * B);
+  ctx.fillStyle = 'rgba(6,12,30,.72)'; ctx.fillRect(ox, 0, 640, CH);
+  for (let r = 2; r < 7; r++) for (let c = 0; c < 4; c++) blk('stone', ox + c * B, r * B);
+  blk('stone', ox, B);
+  for (let c = 4; c < 10; c++) blk('stone', ox + c * B, 6 * B);
+  if (kind === 'source') for (let c = 5; c < 10; c++) blk('stone', ox + c * B, 5 * B);
+  waterAt(1, 1, 8, t, ox); waterAt(2, 1, 7, t, ox); waterAt(3, 1, 6, t, ox);
+  const born = done || tp >= 900, bornK = done ? 1 : easeOutBack(clamp((tp - 900) / 350));
+  if (kind === 'flow') LFLOW.forEach(([c, L]) => { if (!(c === 4 && born)) lavaAt(c, 5, L, t, ox); });
+  else if (!born) lavaAt(4, 5, 8, t, ox);
+  // lava glow
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  const gx = ox + (kind === 'flow' ? 7 * B : 4.5 * B), gr = ctx.createRadialGradient(gx, 5.6 * B, 10, gx, 5.6 * B, 220);
+  gr.addColorStop(0, 'rgba(255,120,30,.28)'); gr.addColorStop(1, 'rgba(255,120,30,0)'); ctx.fillStyle = gr; ctx.fillRect(ox, 2 * B, 640, 5 * B); ctx.restore();
+  // falling water
+  const y0 = 2 * B - 48, target = born ? 5 * B : (kind === 'flow' ? 6 * B - 16 : 5 * B);
+  const len = done ? target - y0 : tp < 0 ? 36 : 36 + (target - y0 - 36) * easeIn(clamp(tp / 600));
+  fluid('water', ox + 4 * B, y0, 22, len, t, .92);
+  if (!done && tp >= 600 && tp < 900) { ctx.fillStyle = `rgba(255,255,255,${(1 - (tp - 600) / 300) * .8})`; ctx.fillRect(ox + 4 * B, 5 * B, B, B); }
+  if (born) {
+    ctx.save(); ctx.translate(ox + 4.5 * B, 5.5 * B); ctx.scale(bornK, bornK); ctx.drawImage(T[kind === 'flow' ? 'cobble' : 'obsid'], -B / 2, -B / 2); ctx.restore();
+    fluid('water', ox + 4 * B, y0, 22, 5 * B - y0, t, .92);
+  }
+  if (!done && tp >= 600 && tp < 1800) {
+    S.acc += 16;
+    while (S.acc > 22) { S.acc -= 22; S.parts.push({ x: ox + 4.5 * B + (Math.random() - .5) * 80, y: 5 * B + Math.random() * 10, vx: (Math.random() - .5) * .06, vy: -(.06 + Math.random() * .09), s: 8 + Math.random() * 12, life: 1100, max: 1100 }); }
+  }
+  tag(kind === 'flow' ? 'ПОТІК ЛАВИ' : 'ДЖЕРЕЛО ЛАВИ', ox + 6.2 * B, 4.6 * B, { c: '#ffb24a', ptr: 'downLeft' });
+  if (born && (done || tp > 1250)) tag(kind === 'flow' ? 'КРУГЛЯК' : 'ОБСИДІАН', ox + 2 * B, 5.4 * B, { c: '#5ff0a8', ptr: 'right' });
+  badge(kind === 'flow' ? 'А' : 'Б', ox + 12, 12);
+  ctx.restore();
+}
+function sceneR3(t, te, tp, part) {
+  if (part === 'a') { lavaHalf(0, 'flow', t, tp, false); lavaHalf(640, 'source', t, -1, false); dim(640, 0, 640, CH, true); }
+  else { lavaHalf(0, 'flow', t, -1, true); ctx.fillStyle = 'rgba(3,8,24,.3)'; ctx.fillRect(0, 0, 640, CH); lavaHalf(640, 'source', t, tp, false); }
+  ctx.fillStyle = '#04102a'; ctx.fillRect(637, 0, 6, CH);
+}
+
+/* --- water elevator (round 4) --- */
+function sceneR4(t, te, tp, part, dt) {
+  const g = ctx.createLinearGradient(0, 0, 0, CH); g.addColorStop(0, '#0b2a5c'); g.addColorStop(1, '#0d4a8a'); ctx.fillStyle = g; ctx.fillRect(0, 0, CW, CH);
+  ctx.fillStyle = 'rgba(160,230,255,.06)'; for (let i = 0; i < 5; i++) { const x = 140 + i * 260 + Math.sin(t / 2000 + i) * 20; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 70, 0); ctx.lineTo(x + 170, CH); ctx.lineTo(x + 60, CH); ctx.fill(); }
+  for (let c = 0; c < 20; c++) blk('sand', c * B, 6 * B);
+  kelp(8.6 * B, 6 * B, 11, t); kelp(10.7 * B, 6 * B, 8, t + 900);
+  const cols = [[3, 'soul'], [13, 'magma']];
+  cols.forEach(([gc, bt]) => { blk(bt, (gc + 1) * B, 6 * B); blk(bt, (gc + 2) * B, 6 * B); fluid('water', (gc + 1) * B, B, 2 * B, 5 * B, t, .82); });
+  // left column: soul sand → up
+  const leftMode = part === 'a' ? (tp < 0 ? 'idle' : 'up') : 'upDone';
+  const rightMode = part === 'a' ? 'idle' : (tp < 0 ? 'idle' : 'down');
+  if (leftMode !== 'idle') {
+    S.accL += dt; const rate = leftMode === 'up' ? 35 : 90;
+    while (S.accL > rate) { S.accL -= rate; S.bL.push({ x: 4 * B + 10 + Math.random() * (2 * B - 20), y: 6 * B - 6, vy: -(.15 + Math.random() * .12), r: 3 + Math.random() * 4, ph: Math.random() * 6 }); }
+  }
+  S.bL = S.bL.filter(b => (b.y += b.vy * dt) > B + 4);
+  S.bL.forEach(b => bubble(b.x + Math.sin(b.ph + b.y / 30) * 4, b.y, b.r));
+  if (rightMode === 'down') {
+    S.accR += dt;
+    while (S.accR > 32) { S.accR -= 32; S.bR.push({ a: Math.random() * 6.28, rad: 8 + Math.random() * 46, y: B + 8, vy: .18 + Math.random() * .12, r: 2 + Math.random() * 4 }); }
+  }
+  S.bR = S.bR.filter(b => { b.y += b.vy * dt; b.a += .008 * dt; return b.y < 6 * B - 8; });
+  S.bR.forEach(b => bubble(15 * B + Math.cos(b.a) * b.rad, b.y, b.r));
+  // explorers
+  let yL = 224 + Math.sin(t / 500) * 4;
+  if (leftMode === 'up') { const k = easeInOut(clamp((tp - 300) / 1400)); yL = lerp(224, 66, k) + (k >= 1 ? Math.sin(t / 300) * 3 : 0); }
+  if (leftMode === 'upDone') yL = 66 + Math.sin(t / 300) * 3;
+  let yR = 224 + Math.sin(t / 500 + 1) * 4, rot = 0;
+  if (rightMode === 'down') { const k = easeIn(clamp((tp - 300) / 1200)); yR = lerp(224, 354, k); rot = Math.sin(tp / 70) * (k < 1 ? .3 : .06); }
+  const drawEx = (x, y, r) => { ctx.save(); ctx.translate(x, y); ctx.rotate(r); ctx.drawImage(explorerImg, -20, -28); ctx.restore(); };
+  drawEx(5 * B, yL, 0); drawEx(15 * B, yR, rot);
+  cols.forEach(([gc]) => { for (let r = 0; r < 7; r++) { blk('glass', gc * B, r * B); blk('glass', (gc + 3) * B, r * B); } });
+  tag('ПІСОК ДУШ', 1.5 * B, 6 * B + 44, { c: '#d9b38c', ptr: 'right' });
+  tag('БЛОК МАГМИ', 18.5 * B, 6 * B + 44, { c: '#ffb24a', ptr: 'left' });
+  if ((part === 'a' && tp > 1700) || part === 'b') pixArrow(1.5 * B, 2.6 * B, 'up', '#5ff0a8');
+  if (part === 'b' && tp > 1500) pixArrow(18.5 * B, 2.6 * B, 'down', '#ffb24a');
+  if (part === 'a') dim(12 * B, 0, 8 * B, CH, true);
+}
+
+function drawParts(dt) {
+  S.parts = S.parts.filter(p => (p.life -= dt) > 0);
+  S.parts.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; const a = p.life / p.max; ctx.fillStyle = `rgba(232,240,250,${a * .75})`; const s = p.s * (1.6 - a * .6); ctx.fillRect(Math.round(p.x - s / 2), Math.round(p.y - s / 2), s, s); });
+}
+function loop(now) {
+  if (S && S.id !== 'intro' && S.id !== 'final') {
+    const dt = Math.min(50, now - S.last); S.last = now;
+    const te = now - S.enter, tp = S.playAt == null ? -1 : now - S.playAt;
+    ctx.clearRect(0, 0, CW, CH);
+    if (S.id === 'r1') sceneR1(now, te, tp);
+    else if (S.id === 'r2') sceneR2(now, te, tp);
+    else if (S.id === 'r3a') sceneR3(now, te, tp, 'a');
+    else if (S.id === 'r3b') sceneR3(now, te, tp, 'b');
+    else if (S.id === 'r4a') sceneR4(now, te, tp, 'a', dt);
+    else if (S.id === 'r4b') sceneR4(now, te, tp, 'b', dt);
+    drawParts(dt);
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ============ sounds per scene ============ */
+function scenePlaySounds(id) {
+  if (id === 'r1') { SFX.splash(); later(() => SFX.bubbles(5, .8), 400); }
+  if (id === 'r2') { for (let i = 0; i < 6; i++) later(() => SFX.drip(i), 150 + i * 260); }
+  if (id === 'r3a' || id === 'r3b') { SFX.splash(); later(SFX.hiss, 600); later(SFX.pop, 950); }
+  if (id === 'r4a') { SFX.bubbles(14, 1.6); later(SFX.splash, 1650); }
+  if (id === 'r4b') { SFX.whoosh(); }
+}
+
+/* ============ UI ============ */
+const roundView = $('#roundView'), intro = $('#intro'), final = $('#final');
+const fb = $('#fb'), fbText = $('#fbText'), fbBtn = $('#fbBtn'), fbIcon = $('#fbIcon');
+
+function setupLeft() {
+  $('#ped1').style.backgroundImage = `url(${texURL('polished')})`;
+  $('#ped2').style.backgroundImage = `url(${texURL('bricks')})`;
+  $('#seabed').style.backgroundImage = `url(${texURL('sand')})`;
+  $('#deep').style.backgroundImage = `url(${texURL('stone')})`;
+  const k = document.createElement('canvas'); k.width = 48; k.height = 192; const kx = k.getContext('2d');
+  for (let i = 0; i < 12; i++) { const off = Math.round(Math.sin(i * .9) * 8) + 12; kx.fillStyle = i % 2 ? '#2f9a4a' : '#3fb35a'; kx.fillRect(off, 192 - (i + 1) * 16, 16, 16); if (i % 3 === 1) { kx.fillStyle = '#5fd06e'; kx.fillRect(off + 16, 192 - (i + 1) * 16 + 4, 10, 8); } }
+  const ku = k.toDataURL(); $('#kelp1').src = ku; $('#kelp2').src = ku;
+  const segs = $('#segs');
+  for (let i = 1; i <= 4; i++) { const s = document.createElement('div'); s.className = 'seg'; s.innerHTML = `<div class="fill" style="background-image:url(${texURL('water')})"></div><div class="num">${i}</div>`; segs.appendChild(s); }
+  const pv = [['waterHigh', 'Раунд 1', 'Де джерело?'], ['blocked', 'Раунд 2', 'Залишиться чи зникне?'], ['lavaMix', 'Раунд 3', 'Що вийде?'], ['lift', 'Раунд 4', 'Вгору чи вниз?']];
+  $('#preview').innerHTML = pv.map(([i, r, n]) => `<div class="pcard"><img src="${ICONS[i]}" alt=""><span>${r}</span>${n}</div>`).join('');
+  const sm = [['waterHigh', 'Джерело — повний блок води. З нього тече потік.'], ['blocked', 'Без джерела потік зникає.'],
+    ['lavaMix', 'Потік лави + вода = кругляк. Джерело лави + вода = обсидіан.'], ['lift', 'Пісок душ піднімає вгору, блок магми тягне вниз.']];
+  $('#sum').innerHTML = sm.map(([i, s], n) => `<div class="sumCard" style="animation-delay:${.6 + n * .2}s"><img src="${ICONS[i]}" alt="">${s}</div>`).join('');
+}
+function updateCrystal(boost) {
+  const n = charged.size, c = n / 4;
+  $('#crys').style.filter = `grayscale(${Math.pow(1 - c, 1.6)}) brightness(${.55 + .5 * c}) drop-shadow(0 0 ${6 + c * 28}px rgba(110,230,255,${.15 + c * .75}))`;
+  $('#halo').style.opacity = c;
+  [...document.querySelectorAll('.seg')].forEach((s, i) => s.classList.toggle('on', charged.has(i + 1)));
+  $('#chargeTxt').textContent = `Заряд: ${n} з 4`;
+  if (boost) { const l = $('#left'); l.classList.remove('boost'); void l.offsetWidth; l.classList.add('boost'); }
+}
+setInterval(() => {
+  const c = charged.size / 4; if (Math.random() > .25 + c * .7) return;
+  const b = document.createElement('div'); b.className = 'bub';
+  const sz = 8 + Math.random() * 10; b.style.width = b.style.height = sz + 'px';
+  b.style.left = (30 + Math.random() * 510) + 'px'; b.style.top = '680px'; b.style.animationDuration = (5 + Math.random() * 4) + 's';
+  $('#bubLayer').appendChild(b); setTimeout(() => b.remove(), 9500);
+}, 600);
+
+function go(i) {
+  clearTimers(); idx = clamp(i, 0, STEPS.length - 1); answered = false;
+  const s = STEPS[idx];
+  $('#btnBack').disabled = idx === 0; $('#btnNext').disabled = idx === STEPS.length - 1;
+  intro.classList.toggle('hidden', s.id !== 'intro');
+  roundView.classList.toggle('hidden', !s.round);
+  final.classList.toggle('show', s.id === 'final');
+  $('#roundPill').textContent = s.id === 'intro' ? 'Готуємося!' : s.id === 'final' ? 'Кристал врятовано!' : `Раунд ${s.round} з 4`;
+  newScene(s.id);
+  if (s.id === 'final') { showFinal(); return; }
+  clearFinal();
+  if (!s.round) return;
+  $('#roundTitle').textContent = `Раунд ${s.round}. ${s.title}`;
+  $('#partBadge').textContent = s.part ? `Питання ${s.part}` : ''; $('#partBadge').classList.toggle('hidden', !s.part);
+  $('#question').textContent = s.q;
+  $('#options').innerHTML = '';
+  s.opts.forEach(([label, ic], k) => {
+    const b = document.createElement('button'); b.className = 'opt';
+    b.innerHTML = `<img src="${ICONS[ic]}" alt=""><span>${label}</span><kbd>${k + 1}</kbd>`;
+    b.onclick = () => answer(k); $('#options').appendChild(b);
+  });
+  fb.className = 'fb';
+  if (s.id === 'r2') later(SFX.thud, 430);
+}
+function answer(k) {
+  const s = STEPS[idx]; if (!s.round || answered) return;
+  answered = true; lastCorrect = k === s.correct;
+  [...document.querySelectorAll('.opt')].forEach((b, i) => { b.disabled = true; if (i !== k) b.classList.add('dim'); });
+  S.playAt = performance.now();
+  SFX.click(); scenePlaySounds(s.id);
+  later(() => showFeedback(k), s.dur);
+}
+function showFeedback(k) {
+  const s = STEPS[idx], ok = lastCorrect;
+  document.querySelectorAll('.opt')[k].classList.add(ok ? 'right' : 'almost');
+  fb.className = 'fb show ' + (ok ? 'ok' : 'almost');
+  fbIcon.textContent = ok ? '✔' : '!';
+  fbText.textContent = ok ? s.explain : 'Майже! Подивіться, що сталося.';
+  fbBtn.textContent = ok ? 'Далі ▶' : '↺ Спробувати ще';
+  if (ok) { if (s.fills && !charged.has(s.round)) { charged.add(s.round); updateCrystal(true); SFX.chime(); } else SFX.ding(); }
+  else SFX.soft();
+}
+fbBtn.onclick = () => { fbBtn.blur(); lastCorrect ? next() : go(idx); };
+function next() { if (idx < STEPS.length - 1) { SFX.click(); go(idx + 1); } }
+function back() { if (idx > 0) { SFX.click(); go(idx - 1); } }
+function restart() { charged.clear(); updateCrystal(false); $('#left').classList.remove('boost'); go(0); }
+
+function showFinal() {
+  for (let r = 1; r <= 4; r++) charged.add(r);
+  updateCrystal(true);
+  // restart CSS animations
+  final.querySelectorAll('.flash,.raysWrap,.sumCard').forEach(e => { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; });
+  const deco = $('#finalDeco'); deco.innerHTML = '';
+  const fishCols = [{ o: '#ff8c2a', s: '#fff1d6' }, { o: '#ffd84a', s: '#2a6fd0' }, { o: '#ff6fa8', s: '#ffe0ef' }, { o: '#4fd6ec', s: '#0b3a7a' }, { o: '#8ef06a', s: '#215a1a' }];
+  for (let i = 0; i < 9; i++) {
+    const c = fishCols[i % fishCols.length], img = spriteCanvas(FISH, { o: c.o, s: c.s, e: '#04102a' }, 6).toDataURL();
+    const f = document.createElement('div'), right = i % 2 === 0;
+    f.className = 'fish ' + (right ? 'r' : 'l');
+    f.style.top = (60 + Math.random() * 860) + 'px'; f.style.animationDuration = (9 + Math.random() * 8) + 's'; f.style.animationDelay = (-Math.random() * 12) + 's';
+    const sc = .8 + Math.random() * .7; f.style.width = 72 * sc + 'px'; f.style.height = 48 * sc + 'px';
+    f.innerHTML = `<img src="${img}" alt="">`; deco.appendChild(f);
+  }
+  for (let i = 0; i < 34; i++) {
+    const b = document.createElement('div'); b.className = 'fbub'; const sz = 8 + Math.random() * 16;
+    b.style.width = b.style.height = sz + 'px'; b.style.left = Math.random() * 1900 + 'px';
+    b.style.animationDuration = (4 + Math.random() * 5) + 's'; b.style.animationDelay = (-Math.random() * 8) + 's'; deco.appendChild(b);
+  }
+  SFX.fanfare();
+}
+function clearFinal() { $('#finalDeco').innerHTML = ''; }
+
+$('#btnNext').onclick = e => { e.currentTarget.blur(); next(); };
+$('#btnBack').onclick = e => { e.currentTarget.blur(); back(); };
+$('#btnRestart').onclick = e => { e.currentTarget.blur(); restart(); };
+$('#startBtn').onclick = e => { e.currentTarget.blur(); A(); SFX.splash(); go(1); };
+$('#againBtn').onclick = e => { e.currentTarget.blur(); restart(); };
+function toggleMute() {
+  AU.muted = !AU.muted; $('#btnMute').textContent = AU.muted ? '🔇' : '🔊';
+  if (AU.master) AU.master.gain.value = AU.muted ? 0 : .6;
+}
+$('#btnMute').onclick = e => { e.currentTarget.blur(); toggleMute(); };
+document.addEventListener('keydown', e => {
+  if (e.repeat) return;
+  if (e.code === 'ArrowRight') { e.preventDefault(); next(); }
+  else if (e.code === 'ArrowLeft') { e.preventDefault(); back(); }
+  else if (e.code === 'KeyR') restart();
+  else if (e.code === 'KeyM') toggleMute();
+  else if (e.code === 'Digit1' || e.code === 'Numpad1') answer(0);
+  else if (e.code === 'Digit2' || e.code === 'Numpad2') answer(1);
+  else if (e.code === 'Enter' || e.code === 'Space') {
+    e.preventDefault();
+    if (STEPS[idx].id === 'intro') $('#startBtn').click();
+    else if (fb.classList.contains('show')) fbBtn.click();
+  }
+});
+
+function fit() {
+  const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+  $('#stage').style.transform = `translate(${(innerWidth - 1920 * s) / 2}px,${(innerHeight - 1080 * s) / 2}px) scale(${s})`;
+}
+addEventListener('resize', fit);
+fit(); setupLeft(); updateCrystal(false); go(0);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
